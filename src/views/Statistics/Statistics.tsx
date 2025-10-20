@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   ActivityIndicator,
   ScrollView,
@@ -13,8 +12,10 @@ import { BarChart } from 'react-native-gifted-charts';
 import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-native';
 import { calculateChartConfig, mapPricesToChartData } from 'utils/chartHelpers';
-import { usePriceData } from '../hooks/usePriceData';
+import { usePriceData } from 'hooks/usePriceData';
 import { useCheapestWindow } from 'hooks/useCheapestWindow';
+import styles from './styles';
+import theme from 'theme';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -22,7 +23,7 @@ const screenHeight = Dimensions.get('window').height;
 const Statistics = () => {
   const [hours, setHours] = useState(3);
   const { priceData, stats, currentPrice, pricesLoading, priceError } = usePriceData();
-  const { cheapestWindowPrices, windowLoading, windowError } = useCheapestWindow(3);
+  const { cheapestWindowPrices, windowLoading, windowError } = useCheapestWindow(hours);
 
   const loading = pricesLoading || windowLoading;
   const error = priceError || windowError;
@@ -33,21 +34,21 @@ const Statistics = () => {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text>Loading data...</Text>
+        <ActivityIndicator size="large" color={theme.colors.accent} />
+        <Text style={styles.loadingText}>Loading data...</Text>
       </View>
     );
   }
 
-  if (error) return <Text>{error}</Text>;
+  if (error) return <Text style={styles.errorText}>{error}</Text>;
 
   const chartData = mapPricesToChartData(priceData);
   const { spacing, yLabels } = calculateChartConfig(chartData, screenWidth);
 
   return (
     <ScrollView style={styles.container}>
-      {/* Price Chart */}
-      <View style={[styles.card, { paddingLeft: 2 }]}>
+      {/* Chart */}
+      <View style={styles.chartCard}>
         <BarChart
           data={chartData}
           spacing={spacing - 25}
@@ -55,18 +56,18 @@ const Statistics = () => {
           height={screenHeight - 550}
           yAxisLabelTexts={yLabels}
           noOfSections={yLabels.length - 1}
-          yAxisColor="#0BA5A4"
-          xAxisLabelTextStyle={{ color: '#e0e1dd', fontSize: 12 }}
-          yAxisTextStyle={{ color: '#e0e1dd', fontSize: 12 }}
+          yAxisColor={theme.colors.primary}
+          xAxisLabelTextStyle={styles.axisText}
+          yAxisTextStyle={styles.axisText}
           verticalLinesColor="rgba(14,164,164,0.5)"
-          xAxisColor="#0BA5A4"
-          color="#0BA5A4"
+          xAxisColor={theme.colors.primary}
+          color={theme.colors.primary}
         />
       </View>
 
       {/* Stats + Current Price */}
       {stats && currentPrice && (
-        <View style={[styles.card, { flexDirection: 'row', justifyContent: 'space-between' }]}>
+        <View style={styles.statsCard}>
           <View>
             <Text style={styles.title}>Statistics</Text>
             <Text style={styles.text}>Min: {stats.min}¢</Text>
@@ -74,11 +75,9 @@ const Statistics = () => {
             <Text style={styles.text}>Avg: {stats.average.toFixed(2)}¢</Text>
           </View>
 
-          <View>
+          <View style={styles.currentPriceContainer}>
             <Text style={styles.title}>Current Price</Text>
-            <View style={{ alignItems: 'center' }}>
-              <Text style={styles.text}>{currentPrice}¢</Text>
-            </View>
+            <Text style={styles.text}>{currentPrice}¢</Text>
           </View>
         </View>
       )}
@@ -129,59 +128,11 @@ const Statistics = () => {
         )}
       </View>
 
-      <View style={{ marginBottom: 70, alignItems: 'center' }}>
+      <View style={styles.buttonContainer}>
         <Button title="Go to Chart" onPress={goToChart} />
       </View>
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#0d1b2a',
-  },
-  card: {
-    backgroundColor: '#1b263b',
-    padding: 16,
-    marginBottom: 16,
-    borderRadius: 8,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#e0e1dd',
-    marginBottom: 8,
-  },
-  input: {
-    height: 40,
-    borderColor: '#778da9',
-    borderWidth: 1,
-    borderRadius: 8,
-    color: '#e0e1dd',
-    paddingLeft: 8,
-    marginBottom: 16,
-  },
-  text: {
-    color: '#e0e1dd',
-    marginBottom: 4,
-  },
-  bold: {
-    fontWeight: 'bold',
-    color: '#e0e1dd',
-  },
-  item: {
-    color: '#e0e1dd',
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0d1b2a',
-  },
-});
 
 export default Statistics;

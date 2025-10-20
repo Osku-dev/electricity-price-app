@@ -3,7 +3,7 @@ import { View, Text, ActivityIndicator, Dimensions, StyleSheet, Button } from 'r
 import { LineChart } from 'react-native-gifted-charts';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useNavigate } from 'react-router-native';
-import { mapPricesToChartData, calculateChartConfig } from '../utils/chartHelpers';
+import { mapPricesToChartData, calculateChartConfig } from '../../utils/chartHelpers';
 import { usePriceData } from 'hooks/usePriceData';
 
 const screenWidth = Dimensions.get('window').width;
