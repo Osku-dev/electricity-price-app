@@ -22,7 +22,11 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  cardPaddingSmall: {
+  statsCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  cardPaddingSmallLeft: {
     paddingLeft: 2,
   },
   chartAxisLabel: {
@@ -63,6 +67,13 @@ const styles = StyleSheet.create({
   item: {
     fontSize: theme.typography.fontSizes.body,
     marginVertical: 2,
+  },
+  button: {
+    marginBottom: 70,
+  },
+  defaultText: {
+    color: theme.colors.textPrimary,
+    fontSize: theme.typography.fontSizes.small,
   },
 });
 
