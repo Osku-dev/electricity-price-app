@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  ActivityIndicator,
-  ScrollView,
-  Dimensions,
-  Button,
-} from 'react-native';
+import { View, Text, TextInput, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-native';
@@ -16,6 +8,7 @@ import { usePriceData } from 'hooks/usePriceData';
 import { useCheapestWindow } from 'hooks/useCheapestWindow';
 import styles from './styles';
 import theme from 'theme';
+import { Button as CustomButton } from 'components/Button/Button';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -35,12 +28,12 @@ const Statistics = () => {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color={theme.colors.accent} />
-        <Text style={styles.loadingText}>Loading data...</Text>
+        <Text style={styles.defaultText}>Loading data...</Text>
       </View>
     );
   }
 
-  if (error) return <Text style={styles.errorText}>{error}</Text>;
+  if (error) return <Text style={styles.defaultText}>{error}</Text>;
 
   const chartData = mapPricesToChartData(priceData);
   const { spacing, yLabels } = calculateChartConfig(chartData, screenWidth);
@@ -48,7 +41,7 @@ const Statistics = () => {
   return (
     <ScrollView style={styles.container}>
       {/* Chart */}
-      <View style={styles.chartCard}>
+      <View style={[styles.card, styles.cardPaddingSmallLeft]}>
         <BarChart
           data={chartData}
           spacing={spacing - 25}
@@ -57,8 +50,8 @@ const Statistics = () => {
           yAxisLabelTexts={yLabels}
           noOfSections={yLabels.length - 1}
           yAxisColor={theme.colors.primary}
-          xAxisLabelTextStyle={styles.axisText}
-          yAxisTextStyle={styles.axisText}
+          xAxisLabelTextStyle={styles.defaultText}
+          yAxisTextStyle={styles.defaultText}
           verticalLinesColor="rgba(14,164,164,0.5)"
           xAxisColor={theme.colors.primary}
           color={theme.colors.primary}
@@ -67,7 +60,7 @@ const Statistics = () => {
 
       {/* Stats + Current Price */}
       {stats && currentPrice && (
-        <View style={styles.statsCard}>
+        <View style={[styles.card, styles.statsCard]}>
           <View>
             <Text style={styles.title}>Statistics</Text>
             <Text style={styles.text}>Min: {stats.min}¢</Text>
@@ -75,7 +68,7 @@ const Statistics = () => {
             <Text style={styles.text}>Avg: {stats.average.toFixed(2)}¢</Text>
           </View>
 
-          <View style={styles.currentPriceContainer}>
+          <View style={styles.alignCenter}>
             <Text style={styles.title}>Current Price</Text>
             <Text style={styles.text}>{currentPrice}¢</Text>
           </View>
@@ -128,8 +121,8 @@ const Statistics = () => {
         )}
       </View>
 
-      <View style={styles.buttonContainer}>
-        <Button title="Go to Chart" onPress={goToChart} />
+      <View style={styles.button}>
+        <CustomButton label="Go to Chart" onPress={goToChart} />
       </View>
     </ScrollView>
   );

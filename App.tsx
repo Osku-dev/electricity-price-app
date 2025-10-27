@@ -2,9 +2,9 @@ import React from 'react';
 import { NativeRouter, Routes, Route } from 'react-router-native';
 import { ApolloProvider } from '@apollo/client/react';
 
-import FullScreenChart from './src/views/FullScreenChart/FullScreenChart';
+import FullScreenChart from './src/views/FullScreenChartView/FullScreenChartView';
 import createApolloClient from './src/utils/apolloClient';
-import Statistics from './src/views/Statistics/Statistics';
+import Statistics from './src/views/StatisticsView/StatisticsView';
 
 const apolloClient = createApolloClient();
 
