@@ -9,6 +9,7 @@ import { useCheapestWindow } from 'hooks/useCheapestWindow';
 import styles from './styles';
 import theme from 'theme';
 import { Button as CustomButton } from 'components/Button/Button';
+import { Card } from 'components/Card/Card';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -41,7 +42,7 @@ const Statistics = () => {
   return (
     <ScrollView style={styles.container}>
       {/* Chart */}
-      <View style={[styles.card, styles.cardPaddingSmallLeft]}>
+      <Card style={styles.cardPaddingSmallLeft}>
         <BarChart
           data={chartData}
           spacing={spacing - 25}
@@ -56,11 +57,11 @@ const Statistics = () => {
           xAxisColor={theme.colors.primary}
           color={theme.colors.primary}
         />
-      </View>
+      </Card>
 
       {/* Stats + Current Price */}
       {stats && currentPrice && (
-        <View style={[styles.card, styles.statsCard]}>
+        <Card style={styles.statsCard}>
           <View>
             <Text style={styles.title}>Statistics</Text>
             <Text style={styles.text}>Min: {stats.min}¢</Text>
@@ -72,11 +73,11 @@ const Statistics = () => {
             <Text style={styles.title}>Current Price</Text>
             <Text style={styles.text}>{currentPrice}¢</Text>
           </View>
-        </View>
+        </Card>
       )}
 
       {/* Cheapest Window */}
-      <View style={styles.card}>
+      <Card>
         <Text style={styles.title}>Cheapest {hours}-hour Window</Text>
 
         <TextInput
@@ -119,7 +120,7 @@ const Statistics = () => {
             ))}
           </>
         )}
-      </View>
+      </Card>
 
       <View style={styles.button}>
         <CustomButton label="Go to Chart" onPress={goToChart} />

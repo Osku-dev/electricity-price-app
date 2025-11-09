@@ -9,7 +9,7 @@ type CardProps = {
 };
 
 export function Card({ children, onPress, style }: CardProps) {
-  const isPressable = typeof onPress === 'function';
+  const isPressable = Boolean(onPress);
   const Container = isPressable ? Pressable : View;
 
   return (
