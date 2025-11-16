@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
+    color: theme.colors.textPrimary,
     fontSize: theme.typography.fontSizes.heading,
     fontWeight: theme.typography.fontWeights.bold,
     marginBottom: 4,
@@ -65,6 +66,7 @@ const styles = StyleSheet.create({
     color: theme.colors.textPrimary,
   },
   item: {
+    color: theme.colors.textPrimary,
     fontSize: theme.typography.fontSizes.body,
     marginVertical: 2,
   },

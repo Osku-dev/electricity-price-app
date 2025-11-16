@@ -1,5 +1,4 @@
 {
-  "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
     "noImplicitAny": true,
@@ -14,7 +13,9 @@
     "jsx": "react-native",
     "baseUrl": "./src",
     "paths": {
-      "*": ["*"]
+      "*": [
+        "*"
+      ]
     },
     "module": "node16",
     "moduleResolution": "node16",
@@ -22,5 +23,6 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true
-  }
+  },
+  "extends": "expo/tsconfig.base"
 }
