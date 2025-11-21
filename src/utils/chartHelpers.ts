@@ -3,8 +3,8 @@ import { Price, ChartPoint } from '../../types';
 
 export function mapPricesToChartData(prices: Price[]): ChartPoint[] {
   return prices.map((price) => ({
-    value: price.price,
-    label: format(parseISO(price.startDate), 'HH'),
+    value: price.value,
+    label: format(parseISO(price.timestamp), 'HH'),
   }));
 }
 

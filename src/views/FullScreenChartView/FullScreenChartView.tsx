@@ -3,9 +3,8 @@ import { View, Text, ActivityIndicator, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useNavigate } from 'react-router-native';
-
 import { mapPricesToChartData, calculateChartConfig } from 'utils/chartHelpers';
-import { usePriceData } from 'hooks/usePriceData';
+import { usePrices } from 'hooks/usePrices';
 
 import { Card } from 'components/Card/Card';
 import { Button } from 'components/Button/Button';
@@ -17,10 +16,10 @@ const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
 const FullScreenChart = () => {
-  const { priceData, pricesLoading, priceError, highlightedIndex, setHighlightedIndex } =
-    usePriceData();
+  const { priceData, loading, error } = usePrices();
 
   const [interval, setInterval] = useState(1);
+  const [highlightedIndex, setHighlightedIndex] = useState<number | undefined>();
   const navigate = useNavigate();
 
   const goToStats = () => navigate('/');
@@ -32,7 +31,7 @@ const FullScreenChart = () => {
     };
   }, []);
 
-  if (pricesLoading) {
+  if (loading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color={theme.colors.accent} />
@@ -41,10 +40,10 @@ const FullScreenChart = () => {
     );
   }
 
-  if (priceError) {
+  if (error) {
     return (
       <View style={styles.center}>
-        <Text style={styles.text}>{priceError}</Text>
+        <Text style={styles.text}>{error.message}</Text>
       </View>
     );
   }

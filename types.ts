@@ -1,7 +1,7 @@
 export interface Price {
-  startDate: string;
-  endDate: string;
-  price: number;
+  timestamp: string;
+  value: number;
+  resolutionMinutes: string;
 }
 
 export interface Stats {

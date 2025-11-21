@@ -17,18 +17,18 @@ export function usePriceData(intervalMs = 5 * 60 * 1000) {
     const fetchData = async () => {
       try {
         const [rawPrices, statsRes] = await Promise.all([getPrices(), getStats()]);
-        const reversedPrices = [...rawPrices].reverse();
-        setPriceData(reversedPrices);
+
+        setPriceData(rawPrices);
         setStats(statsRes);
 
         const now = new Date();
-        const currentSlot = reversedPrices.find((price) =>
+        const currentSlot = rawPrices.find((price) =>
           isWithinInterval(now, {
             start: parseISO(price.startDate),
             end: parseISO(price.endDate),
           }),
         );
-        setCurrentPrice(currentSlot ? currentSlot.price : null);
+        setCurrentPrice(currentSlot ? currentSlot.value : null);
       } catch (err) {
         console.error('Error fetching price or stats data', err);
         setPriceError('Failed to load price data');
