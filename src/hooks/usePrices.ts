@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useGetPricesQuery } from '../graphql/generated';
 import type { GetPricesQueryVariables } from '../graphql/generated';
 
-const usePrices = (variables: GetPricesQueryVariables) => {
+export const usePrices = (variables?: GetPricesQueryVariables) => {
   const { data, loading, error, fetchMore, ...result } = useGetPricesQuery({
     variables,
     fetchPolicy: 'cache-and-network',
@@ -14,7 +14,7 @@ const usePrices = (variables: GetPricesQueryVariables) => {
 
   const handleFetchNext = () => {
     const canFetchMore = !loading && data?.prices.pageInfo.hasNextPage;
-    if (!canFetchMore) return;
+    if (!canFetchMore || !variables) return;
 
     fetchMore({
       variables: {
@@ -26,7 +26,7 @@ const usePrices = (variables: GetPricesQueryVariables) => {
 
   const handleFetchPrevious = () => {
     const canFetchMore = !loading && data?.prices.pageInfo.hasPreviousPage;
-    if (!canFetchMore) return;
+    if (!canFetchMore || !variables) return;
 
     fetchMore({
       variables: {
@@ -36,10 +36,10 @@ const usePrices = (variables: GetPricesQueryVariables) => {
     });
   };
 
-  const prices = data?.prices.edges.map((edge) => edge.node) ?? [];
+  const priceData = data?.prices.edges.map((edge) => edge.node) ?? [];
 
   return {
-    prices,
+    priceData,
     pageInfo: data?.prices.pageInfo,
     fetchNext: handleFetchNext,
     fetchPrevious: handleFetchPrevious,
