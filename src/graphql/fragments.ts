@@ -16,5 +16,10 @@ export const PRICE_FRAGMENT = gql`
       hasPreviousPage
       startCursor
     }
+    stats {
+      minPrice
+      maxPrice
+      avgPrice
+    }
   }
 `;

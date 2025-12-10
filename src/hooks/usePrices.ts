@@ -41,6 +41,7 @@ export const usePrices = (variables?: GetPricesQueryVariables) => {
   return {
     priceData,
     pageInfo: data?.prices.pageInfo,
+    stats: data?.prices.stats,
     fetchNext: handleFetchNext,
     fetchPrevious: handleFetchPrevious,
     loading,

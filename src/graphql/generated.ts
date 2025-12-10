@@ -1,5 +1,6 @@
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client/react';
+import { useLazyQuery, useQuery, useSuspenseQuery } from '@apollo/client/react';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -40,6 +41,7 @@ export type PriceConnection = {
   __typename?: 'PriceConnection';
   edges: Array<PriceEdge>;
   pageInfo: PageInfo;
+  stats?: Maybe<Stats>;
 };
 
 export type PriceEdge = {
@@ -60,6 +62,13 @@ export type QueryPricesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type Stats = {
+  __typename?: 'Stats';
+  avgPrice?: Maybe<Scalars['Float']['output']>;
+  maxPrice?: Maybe<Scalars['Float']['output']>;
+  minPrice?: Maybe<Scalars['Float']['output']>;
+};
+
 export type PriceDetailsFragment = {
   __typename?: 'PriceConnection';
   edges: Array<{
@@ -74,6 +83,12 @@ export type PriceDetailsFragment = {
     hasPreviousPage: boolean;
     startCursor?: string | null;
   };
+  stats?: {
+    __typename?: 'Stats';
+    minPrice?: number | null;
+    maxPrice?: number | null;
+    avgPrice?: number | null;
+  } | null;
 };
 
 export type GetPricesQueryVariables = Exact<{
@@ -99,6 +114,12 @@ export type GetPricesQuery = {
       hasPreviousPage: boolean;
       startCursor?: string | null;
     };
+    stats?: {
+      __typename?: 'Stats';
+      minPrice?: number | null;
+      maxPrice?: number | null;
+      avgPrice?: number | null;
+    } | null;
   };
 };
 
@@ -117,6 +138,11 @@ export const PriceDetailsFragmentDoc = gql`
       hasNextPage
       hasPreviousPage
       startCursor
+    }
+    stats {
+      minPrice
+      maxPrice
+      avgPrice
     }
   }
 `;
@@ -149,21 +175,19 @@ export const GetPricesDocument = gql`
  * });
  */
 export function useGetPricesQuery(
-  baseOptions?: Apollo.QueryHookOptions<GetPricesQuery, GetPricesQueryVariables>,
+  baseOptions?: useQuery.Options<GetPricesQuery, GetPricesQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useQuery<GetPricesQuery, GetPricesQueryVariables>(GetPricesDocument, options);
 }
 export function useGetPricesLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<GetPricesQuery, GetPricesQueryVariables>,
+  baseOptions?: useLazyQuery.Options<GetPricesQuery, GetPricesQueryVariables>,
 ) {
   const options = { ...defaultOptions, ...baseOptions };
   return Apollo.useLazyQuery<GetPricesQuery, GetPricesQueryVariables>(GetPricesDocument, options);
 }
 export function useGetPricesSuspenseQuery(
-  baseOptions?:
-    | Apollo.SkipToken
-    | Apollo.SuspenseQueryHookOptions<GetPricesQuery, GetPricesQueryVariables>,
+  baseOptions?: Apollo.SkipToken | useSuspenseQuery.Options<GetPricesQueryVariables>,
 ) {
   const options =
     baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };

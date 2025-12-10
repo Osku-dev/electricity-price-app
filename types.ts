@@ -5,9 +5,9 @@ export interface Price {
 }
 
 export interface Stats {
-  min: number;
-  max: number;
-  average: number;
+  minPrice: number;
+  maxPrice: number;
+  avgPrice: number;
 }
 
 export interface ChartPoint {

@@ -1,26 +1,25 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
-import { format, parseISO } from 'date-fns';
+import { addMinutes, format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-native';
 import { calculateChartConfig, mapPricesToChartData } from 'utils/chartHelpers';
-import { usePriceData } from 'hooks/usePriceData';
-import { useCheapestWindow } from 'hooks/useCheapestWindow';
+import { usePrices } from 'hooks/usePrices';
 import styles from './styles';
 import theme from 'theme';
 import { Button as CustomButton } from 'components/Button/Button';
 import { Card } from 'components/Card/Card';
+import { useCurrentPrice } from 'hooks/useCurrentPrice';
+import { findCheapestChargingWindow, isValidStats } from 'utils/statHelpers';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
 const Statistics = () => {
   const [hours, setHours] = useState(3);
-  const { priceData, stats, currentPrice, pricesLoading, priceError } = usePriceData();
-  const { cheapestWindowPrices, windowLoading, windowError } = useCheapestWindow(hours);
-
-  const loading = pricesLoading || windowLoading;
-  const error = priceError || windowError;
+  const { priceData, loading, error, stats } = usePrices();
+  const currentPrice = useCurrentPrice(priceData);
+  const cheapestWindowPrices = findCheapestChargingWindow(priceData, hours);
 
   const navigate = useNavigate();
   const goToChart = () => navigate('/chart');
@@ -34,7 +33,7 @@ const Statistics = () => {
     );
   }
 
-  if (error) return <Text style={styles.defaultText}>{error}</Text>;
+  if (error) return <Text style={styles.defaultText}>{error.message}</Text>;
 
   const chartData = mapPricesToChartData(priceData);
   const { spacing, yLabels } = calculateChartConfig(chartData, screenWidth);
@@ -60,13 +59,13 @@ const Statistics = () => {
       </Card>
 
       {/* Stats + Current Price */}
-      {stats && currentPrice && (
+      {isValidStats(stats) && typeof currentPrice === 'number' && (
         <Card style={styles.statsCard}>
           <View>
             <Text style={styles.title}>Statistics</Text>
-            <Text style={styles.text}>Min: {stats.min}¢</Text>
-            <Text style={styles.text}>Max: {stats.max}¢</Text>
-            <Text style={styles.text}>Avg: {stats.average.toFixed(2)}¢</Text>
+            <Text style={styles.text}>Min: {stats.minPrice}¢</Text>
+            <Text style={styles.text}>Max: {stats.maxPrice}¢</Text>
+            <Text style={styles.text}>Avg: {stats.avgPrice}¢</Text>
           </View>
 
           <View style={styles.alignCenter}>
@@ -77,50 +76,56 @@ const Statistics = () => {
       )}
 
       {/* Cheapest Window */}
-      <Card>
-        <Text style={styles.title}>Cheapest {hours}-hour Window</Text>
+      {
+        <Card>
+          <Text style={styles.title}>Cheapest {hours}-hour Window</Text>
 
-        <TextInput
-          style={styles.input}
-          value={String(hours)}
-          keyboardType="numeric"
-          onChangeText={(text) => setHours(Number(text))}
-          maxLength={2}
-        />
+          <TextInput
+            style={styles.input}
+            value={String(hours)}
+            keyboardType="numeric"
+            onChangeText={(text) => setHours(Number(text))}
+            maxLength={2}
+          />
 
-        {cheapestWindowPrices.length > 0 && (
-          <>
-            <Text style={styles.text}>
-              From{' '}
-              <Text style={styles.bold}>
-                {format(parseISO(cheapestWindowPrices[0].startDate), 'HH:mm')}
-              </Text>{' '}
-              to{' '}
-              <Text style={styles.bold}>
-                {format(parseISO(cheapestWindowPrices.at(-1)!.endDate), 'HH:mm')}
+          {cheapestWindowPrices.length > 0 && (
+            <>
+              <Text style={styles.text}>
+                From{' '}
+                <Text style={styles.bold}>
+                  {format(parseISO(cheapestWindowPrices[0].timestamp), 'HH:mm')}
+                </Text>{' '}
+                to{' '}
+                <Text style={styles.bold}>
+                  {format(
+                    addMinutes(parseISO(cheapestWindowPrices.at(-1)?.timestamp ?? ''), 15),
+                    'HH:mm',
+                  )}
+                </Text>
               </Text>
-            </Text>
 
-            <Text style={styles.text}>
-              Avg price:{' '}
-              <Text style={styles.bold}>
-                {(
-                  cheapestWindowPrices.reduce((sum, p) => sum + p.price, 0) /
-                  cheapestWindowPrices.length
-                ).toFixed(3)}
-                ¢
+              <Text style={styles.text}>
+                Avg price:{' '}
+                <Text style={styles.bold}>
+                  {(
+                    cheapestWindowPrices.reduce((sum, p) => sum + p.value, 0) /
+                    cheapestWindowPrices.length
+                  ).toFixed(3)}
+                  ¢
+                </Text>
               </Text>
-            </Text>
 
-            {cheapestWindowPrices.map((entry, idx) => (
-              <Text key={idx} style={styles.item}>
-                {format(parseISO(entry.startDate), 'HH:mm')} –{' '}
-                {format(parseISO(entry.endDate), 'HH:mm')}: {entry.price.toFixed(3)}¢
-              </Text>
-            ))}
-          </>
-        )}
-      </Card>
+              {cheapestWindowPrices.map((entry, idx) => (
+                <Text key={idx} style={styles.item}>
+                  {format(parseISO(entry.timestamp), 'HH:mm')} –{' '}
+                  {format(addMinutes(parseISO(entry.timestamp), 15), 'HH:mm')}:{' '}
+                  {entry.value.toFixed(3)}¢
+                </Text>
+              ))}
+            </>
+          )}
+        </Card>
+      }
 
       <View style={styles.button}>
         <CustomButton label="Go to Chart" onPress={goToChart} />
