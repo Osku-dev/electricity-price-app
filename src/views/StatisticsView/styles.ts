@@ -73,6 +73,14 @@ const styles = StyleSheet.create({
   button: {
     marginBottom: 70,
   },
+  detailButton: {
+    backgroundColor: theme.colors.background,
+  },
+  avgRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   defaultText: {
     color: theme.colors.textPrimary,
     fontSize: theme.typography.fontSizes.small,

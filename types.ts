@@ -14,3 +14,5 @@ export interface ChartPoint {
   value: number;
   label: string;
 }
+
+export type ChartIntervals = 1 | 3;

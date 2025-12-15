@@ -31,3 +31,21 @@ export function calculateChartConfig(
 
   return { chartWidth, spacing, yLabels, minY, maxY };
 }
+export function toHourlyAverages(prices: Price[]): Price[] {
+  const HOURLY_BLOCK = 4;
+  const result: Price[] = [];
+
+  for (let i = 0; i + HOURLY_BLOCK - 1 < prices.length; i += HOURLY_BLOCK) {
+    const block = prices.slice(i, i + HOURLY_BLOCK);
+
+    const avg = block.reduce((sum, p) => sum + p.value, 0) / HOURLY_BLOCK;
+
+    result.push({
+      timestamp: block[0].timestamp,
+      value: Number(avg.toFixed(3)),
+      resolutionMinutes: '60',
+    });
+  }
+
+  return result;
+}

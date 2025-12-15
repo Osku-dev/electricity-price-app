@@ -1,19 +1,21 @@
 import React from 'react';
-import { Pressable, Text, StyleSheet } from 'react-native';
+import { Pressable, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import theme from '../../theme';
 
 type ButtonProps = {
   label: string;
   onPress?: () => void;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
 };
 
-export function Button({ label, onPress }: ButtonProps) {
+export function Button({ label, onPress, style, textStyle }: ButtonProps) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+      style={({ pressed }) => [styles.button, pressed && styles.buttonPressed, style]}
     >
-      <Text style={styles.text}>{label}</Text>
+      <Text style={[styles.text, textStyle]}>{label}</Text>
     </Pressable>
   );
 }

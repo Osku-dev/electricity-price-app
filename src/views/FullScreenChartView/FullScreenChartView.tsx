@@ -3,7 +3,7 @@ import { View, Text, ActivityIndicator, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useNavigate } from 'react-router-native';
-import { mapPricesToChartData, calculateChartConfig } from 'utils/chartHelpers';
+import { mapPricesToChartData, calculateChartConfig, toHourlyAverages } from 'utils/chartHelpers';
 import { usePrices } from 'hooks/usePrices';
 
 import { Card } from 'components/Card/Card';
@@ -11,6 +11,7 @@ import { Button } from 'components/Button/Button';
 
 import styles from './styles';
 import theme from 'theme';
+import { ChartIntervals } from '../../../types';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -18,7 +19,7 @@ const screenHeight = Dimensions.get('window').height;
 const FullScreenChart = () => {
   const { priceData, loading, error } = usePrices();
 
-  const [interval, setInterval] = useState(1);
+  const [interval, setInterval] = useState<ChartIntervals>(1);
   const [highlightedIndex, setHighlightedIndex] = useState<number | undefined>();
   const navigate = useNavigate();
 
@@ -47,8 +48,9 @@ const FullScreenChart = () => {
       </View>
     );
   }
-
-  const displayedData = interval === 1 ? priceData : priceData.filter((_, i) => i % 3 === 0);
+  const hourlyAveragedData = toHourlyAverages(priceData);
+  const displayedData =
+    interval === 1 ? hourlyAveragedData : hourlyAveragedData.filter((_, i) => i % 3 === 0);
 
   const chartData = mapPricesToChartData(displayedData);
   const { spacing, yLabels } = calculateChartConfig(chartData, screenWidth);

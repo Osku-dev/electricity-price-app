@@ -16,10 +16,11 @@ const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
 const Statistics = () => {
-  const [hours, setHours] = useState(3);
+  const [chargingHours, setChargingHours] = useState(3);
   const { priceData, loading, error, stats } = usePrices();
   const currentPrice = useCurrentPrice(priceData);
-  const cheapestWindowPrices = findCheapestChargingWindow(priceData, hours);
+  const cheapestWindowPrices = findCheapestChargingWindow(priceData, chargingHours);
+  const [showDetails, setShowDetails] = useState(false);
 
   const navigate = useNavigate();
   const goToChart = () => navigate('/chart');
@@ -76,34 +77,34 @@ const Statistics = () => {
       )}
 
       {/* Cheapest Window */}
-      {
-        <Card>
-          <Text style={styles.title}>Cheapest {hours}-hour Window</Text>
+      <Card>
+        <Text style={styles.title}>Cheapest {chargingHours}-hour Window</Text>
 
-          <TextInput
-            style={styles.input}
-            value={String(hours)}
-            keyboardType="numeric"
-            onChangeText={(text) => setHours(Number(text))}
-            maxLength={2}
-          />
+        <TextInput
+          style={styles.input}
+          value={String(chargingHours)}
+          keyboardType="numeric"
+          onChangeText={(text) => setChargingHours(Number(text))}
+          maxLength={2}
+        />
 
-          {cheapestWindowPrices.length > 0 && (
-            <>
-              <Text style={styles.text}>
-                From{' '}
-                <Text style={styles.bold}>
-                  {format(parseISO(cheapestWindowPrices[0].timestamp), 'HH:mm')}
-                </Text>{' '}
-                to{' '}
-                <Text style={styles.bold}>
-                  {format(
-                    addMinutes(parseISO(cheapestWindowPrices.at(-1)?.timestamp ?? ''), 15),
-                    'HH:mm',
-                  )}
-                </Text>
+        {cheapestWindowPrices.length > 0 && (
+          <>
+            <Text style={styles.text}>
+              From{' '}
+              <Text style={styles.bold}>
+                {format(parseISO(cheapestWindowPrices[0].timestamp), 'HH:mm')}
+              </Text>{' '}
+              to{' '}
+              <Text style={styles.bold}>
+                {format(
+                  addMinutes(parseISO(cheapestWindowPrices.at(-1)?.timestamp ?? ''), 15),
+                  'HH:mm',
+                )}
               </Text>
+            </Text>
 
+            <View style={styles.avgRow}>
               <Text style={styles.text}>
                 Avg price:{' '}
                 <Text style={styles.bold}>
@@ -115,17 +116,24 @@ const Statistics = () => {
                 </Text>
               </Text>
 
-              {cheapestWindowPrices.map((entry, idx) => (
+              <CustomButton
+                label={showDetails ? 'Hide details' : 'Show details'}
+                onPress={() => setShowDetails((prev) => !prev)}
+                style={styles.detailButton}
+              />
+            </View>
+
+            {showDetails &&
+              cheapestWindowPrices.map((entry, idx) => (
                 <Text key={idx} style={styles.item}>
                   {format(parseISO(entry.timestamp), 'HH:mm')} –{' '}
                   {format(addMinutes(parseISO(entry.timestamp), 15), 'HH:mm')}:{' '}
                   {entry.value.toFixed(3)}¢
                 </Text>
               ))}
-            </>
-          )}
-        </Card>
-      }
+          </>
+        )}
+      </Card>
 
       <View style={styles.button}>
         <CustomButton label="Go to Chart" onPress={goToChart} />
