@@ -1,5 +1,6 @@
 import { Stats } from 'graphql/generated';
 import { Price } from '../../types';
+import { parseISO, addMinutes, isWithinInterval } from 'date-fns';
 
 export function findCheapestChargingWindow(prices: Price[], hours: number) {
   const windowSize = hours * 4; // 15min entries
@@ -22,6 +23,16 @@ export function findCheapestChargingWindow(prices: Price[], hours: number) {
   }
 
   return cheapestWindow;
+}
+
+export function getFuturePrices(prices: Price[]): Price[] {
+  const now = new Date();
+
+  return prices.filter((price) => {
+    const start = parseISO(price.timestamp);
+    const end = addMinutes(start, 15);
+    return isWithinInterval(now, { start, end }) || start > now;
+  });
 }
 export function isValidStats(stats: Stats | null | undefined): stats is Stats {
   return (

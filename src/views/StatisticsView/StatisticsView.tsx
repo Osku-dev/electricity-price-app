@@ -10,7 +10,7 @@ import theme from 'theme';
 import { Button as CustomButton } from 'components/Button/Button';
 import { Card } from 'components/Card/Card';
 import { useCurrentPrice } from 'hooks/useCurrentPrice';
-import { findCheapestChargingWindow, isValidStats } from 'utils/statHelpers';
+import { findCheapestChargingWindow, getFuturePrices, isValidStats } from 'utils/statHelpers';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -18,8 +18,9 @@ const screenHeight = Dimensions.get('window').height;
 const Statistics = () => {
   const [chargingHours, setChargingHours] = useState(3);
   const { priceData, loading, error, stats } = usePrices();
+  const chargingData = getFuturePrices(priceData);
   const currentPrice = useCurrentPrice(priceData);
-  const cheapestWindowPrices = findCheapestChargingWindow(priceData, chargingHours);
+  const cheapestWindowPrices = findCheapestChargingWindow(chargingData, chargingHours);
   const [showDetails, setShowDetails] = useState(false);
 
   const navigate = useNavigate();
