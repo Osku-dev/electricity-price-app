@@ -3,25 +3,26 @@ import { View, Text, TextInput, ActivityIndicator, ScrollView, Dimensions } from
 import { BarChart } from 'react-native-gifted-charts';
 import { addMinutes, format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-native';
-import { calculateChartConfig, mapPricesToChartData } from 'utils/chartHelpers';
-import { usePrices } from 'hooks/usePrices';
+import { calculateChartConfig, mapPricesToChartData, toHourlyAverages } from 'utils/chartHelpers';
 import styles from './styles';
 import theme from 'theme';
 import { Button as CustomButton } from 'components/Button/Button';
 import { Card } from 'components/Card/Card';
 import { useCurrentPrice } from 'hooks/useCurrentPrice';
 import { findCheapestChargingWindow, getFuturePrices, isValidStats } from 'utils/statHelpers';
+import { StatIntervalMinutes, PriceProps } from '../../../types';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
-const Statistics = () => {
+const Statistics = ({ prices }: PriceProps) => {
   const [chargingHours, setChargingHours] = useState(3);
-  const { priceData, loading, error, stats } = usePrices();
+  const { priceData, loading, error, stats } = prices;
   const chargingData = getFuturePrices(priceData);
   const currentPrice = useCurrentPrice(priceData);
   const cheapestWindowPrices = findCheapestChargingWindow(chargingData, chargingHours);
   const [showDetails, setShowDetails] = useState(false);
+  const [interval, setInterval] = useState<StatIntervalMinutes>(15);
 
   const navigate = useNavigate();
   const goToChart = () => navigate('/chart');
@@ -37,7 +38,9 @@ const Statistics = () => {
 
   if (error) return <Text style={styles.defaultText}>{error.message}</Text>;
 
-  const chartData = mapPricesToChartData(priceData);
+  const hourlyAveragedData = toHourlyAverages(priceData);
+  const displayedData = interval === 60 ? hourlyAveragedData : priceData;
+  const chartData = mapPricesToChartData(displayedData);
   const { spacing, yLabels } = calculateChartConfig(chartData, screenWidth);
 
   return (
@@ -58,6 +61,11 @@ const Statistics = () => {
           xAxisColor={theme.colors.primary}
           color={theme.colors.primary}
         />
+        <View style={styles.buttonRow}>
+          <CustomButton label="15min" onPress={() => setInterval(15)} />
+          <View style={styles.spacer} />
+          <CustomButton label="1h" onPress={() => setInterval(60)} />
+        </View>
       </Card>
 
       {/* Stats + Current Price */}

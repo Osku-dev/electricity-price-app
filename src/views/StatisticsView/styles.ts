@@ -81,6 +81,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  buttonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
+  spacer: {
+    width: 12,
+  },
   defaultText: {
     color: theme.colors.textPrimary,
     fontSize: theme.typography.fontSizes.small,

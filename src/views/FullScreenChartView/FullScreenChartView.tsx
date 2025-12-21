@@ -4,20 +4,19 @@ import { LineChart } from 'react-native-gifted-charts';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useNavigate } from 'react-router-native';
 import { mapPricesToChartData, calculateChartConfig, toHourlyAverages } from 'utils/chartHelpers';
-import { usePrices } from 'hooks/usePrices';
 
 import { Card } from 'components/Card/Card';
 import { Button } from 'components/Button/Button';
 
 import styles from './styles';
 import theme from 'theme';
-import { ChartIntervals } from '../../../types';
+import { ChartIntervals, PriceProps } from '../../../types';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
-const FullScreenChart = () => {
-  const { priceData, loading, error } = usePrices();
+const FullScreenChart = ({ prices }: PriceProps) => {
+  const { priceData, loading, error } = prices;
 
   const [interval, setInterval] = useState<ChartIntervals>(1);
   const [highlightedIndex, setHighlightedIndex] = useState<number | undefined>();
