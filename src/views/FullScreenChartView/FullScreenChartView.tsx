@@ -86,8 +86,7 @@ const FullScreenChart = ({ prices }: PriceProps) => {
           textShiftY={50}
           height={screenHeight - 500}
           textShiftX={50}
-          yAxisLabelTexts={yLabels}
-          noOfSections={yLabels.length - 1}
+          noOfSections={6}
           textFontSize={13}
           thickness={5}
           yAxisColor={theme.colors.primary}

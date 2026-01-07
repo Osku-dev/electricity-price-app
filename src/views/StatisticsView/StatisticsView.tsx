@@ -41,7 +41,7 @@ const Statistics = ({ prices }: PriceProps) => {
   const hourlyAveragedData = toHourlyAverages(priceData);
   const displayedData = interval === 60 ? hourlyAveragedData : priceData;
   const chartData = mapPricesToChartData(displayedData);
-  const { spacing, yLabels } = calculateChartConfig(chartData, screenWidth);
+  const { spacing } = calculateChartConfig(chartData, screenWidth);
 
   return (
     <ScrollView style={styles.container}>
@@ -51,13 +51,14 @@ const Statistics = ({ prices }: PriceProps) => {
           data={chartData}
           spacing={spacing - 25}
           barWidth={15}
+          minHeight={5}
           height={screenHeight - 550}
-          yAxisLabelTexts={yLabels}
-          noOfSections={yLabels.length - 1}
+          noOfSections={6}
           yAxisColor={theme.colors.primary}
           xAxisLabelTextStyle={styles.defaultText}
           yAxisTextStyle={styles.defaultText}
           verticalLinesColor="rgba(14,164,164,0.5)"
+          xAxisThickness={1}
           xAxisColor={theme.colors.primary}
           color={theme.colors.primary}
         />

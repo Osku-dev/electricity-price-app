@@ -31,12 +31,36 @@ export function calculateChartConfig(
 
   return { chartWidth, spacing, yLabels, minY, maxY };
 }
+
+export function trimToFullHours(prices: Price[]): Price[] {
+  if (prices.length === 0) return prices;
+
+  let start = 0;
+  let end = prices.length - 1;
+
+  while (start < prices.length) {
+    const minutes = parseISO(prices[start].timestamp).getMinutes();
+    if (minutes === 0) break;
+    start++;
+  }
+
+  while (end >= start) {
+    const minutes = parseISO(prices[end].timestamp).getMinutes();
+    if (minutes === 45) break;
+    end--;
+  }
+
+  return prices.slice(start, end + 1);
+}
+
 export function toHourlyAverages(prices: Price[]): Price[] {
   const HOURLY_BLOCK = 4;
   const result: Price[] = [];
 
-  for (let i = 0; i + HOURLY_BLOCK - 1 < prices.length; i += HOURLY_BLOCK) {
-    const block = prices.slice(i, i + HOURLY_BLOCK);
+  const alignedPrices = trimToFullHours(prices);
+
+  for (let i = 0; i + HOURLY_BLOCK - 1 < alignedPrices.length; i += HOURLY_BLOCK) {
+    const block = alignedPrices.slice(i, i + HOURLY_BLOCK);
 
     const avg = block.reduce((sum, p) => sum + p.value, 0) / HOURLY_BLOCK;
 
