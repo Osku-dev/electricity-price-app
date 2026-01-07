@@ -52,7 +52,7 @@ const FullScreenChart = ({ prices }: PriceProps) => {
     interval === 1 ? hourlyAveragedData : hourlyAveragedData.filter((_, i) => i % 3 === 0);
 
   const chartData = mapPricesToChartData(displayedData);
-  const { spacing, yLabels } = calculateChartConfig(chartData, screenWidth);
+  const { spacing } = calculateChartConfig(chartData, screenWidth);
 
   return (
     <View style={styles.screen}>
