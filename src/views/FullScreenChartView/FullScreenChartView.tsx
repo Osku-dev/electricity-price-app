@@ -10,7 +10,7 @@ import { Button } from 'components/Button/Button';
 
 import styles from './styles';
 import theme from 'theme';
-import { ChartIntervals, PriceProps } from '../../../types';
+import { ChartIntervals, ChartPoint, PriceProps } from '../../../types';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -31,6 +31,17 @@ const FullScreenChart = ({ prices }: PriceProps) => {
     };
   }, []);
 
+  const hourlyAveragedData = toHourlyAverages(priceData);
+  const displayedData =
+    interval === 1 ? hourlyAveragedData : hourlyAveragedData.filter((_, i) => i % 3 === 0);
+
+  const chartData = mapPricesToChartData(displayedData);
+
+  useEffect(() => {
+    setHighlightedIndex(undefined);
+  }, [interval, chartData.length]);
+  const { spacing } = calculateChartConfig(chartData, screenWidth);
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -47,12 +58,6 @@ const FullScreenChart = ({ prices }: PriceProps) => {
       </View>
     );
   }
-  const hourlyAveragedData = toHourlyAverages(priceData);
-  const displayedData =
-    interval === 1 ? hourlyAveragedData : hourlyAveragedData.filter((_, i) => i % 3 === 0);
-
-  const chartData = mapPricesToChartData(displayedData);
-  const { spacing } = calculateChartConfig(chartData, screenWidth);
 
   return (
     <View style={styles.screen}>
@@ -73,8 +78,8 @@ const FullScreenChart = ({ prices }: PriceProps) => {
           initialSpacing={50}
           data={chartData}
           dataPointsRadius={7}
-          onFocus={(index: number | undefined) => {
-            if (index === undefined) return;
+          onFocus={(_item: ChartPoint, index?: number) => {
+            if (index == null) return;
             setHighlightedIndex((prev) => (prev === index ? undefined : index));
           }}
           focusEnabled
