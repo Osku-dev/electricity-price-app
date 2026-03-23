@@ -1,5 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  ActivityIndicator,
+  ScrollView,
+  Dimensions,
+  RefreshControl,
+} from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import { addMinutes, format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-native';
@@ -11,21 +19,35 @@ import { Card } from 'components/Card/Card';
 import { useCurrentPrice } from 'hooks/useCurrentPrice';
 import { findCheapestChargingWindow, getFuturePrices, isValidStats } from 'utils/statHelpers';
 import { StatIntervalMinutes, PriceProps } from '../../../types';
+import { usePullToRefresh } from 'hooks/usePullToRefresh';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
 const Statistics = ({ prices }: PriceProps) => {
   const [chargingHours, setChargingHours] = useState(3);
-  const { priceData, loading, error, stats } = prices;
+  const { priceData, loading, error, stats, refetch } = prices;
   const chargingData = getFuturePrices(priceData);
-  const currentPrice = useCurrentPrice(priceData);
+
   const cheapestWindowPrices = findCheapestChargingWindow(chargingData, chargingHours);
   const [showDetails, setShowDetails] = useState(false);
   const [interval, setInterval] = useState<StatIntervalMinutes>(15);
 
   const navigate = useNavigate();
   const goToChart = () => navigate('/chart');
+
+  const hourlyAveragedData = toHourlyAverages(priceData);
+  const displayedData = interval === 60 ? hourlyAveragedData : priceData;
+  const chartData = mapPricesToChartData(displayedData);
+  const { spacing } = calculateChartConfig(chartData, screenWidth);
+  const { currentPrice, currentPriceIndex } = useCurrentPrice(priceData);
+  const [scrollIndex, setScrollIndex] = useState<number | undefined>(undefined);
+  const { refreshing, onRefresh } = usePullToRefresh(refetch);
+  useEffect(() => {
+    if (currentPriceIndex != null) {
+      setScrollIndex(currentPriceIndex);
+    }
+  }, [currentPriceIndex]);
 
   if (loading) {
     return (
@@ -38,13 +60,11 @@ const Statistics = ({ prices }: PriceProps) => {
 
   if (error) return <Text style={styles.defaultText}>{error.message}</Text>;
 
-  const hourlyAveragedData = toHourlyAverages(priceData);
-  const displayedData = interval === 60 ? hourlyAveragedData : priceData;
-  const chartData = mapPricesToChartData(displayedData);
-  const { spacing } = calculateChartConfig(chartData, screenWidth);
-
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+    >
       {/* Chart */}
       <Card style={styles.cardPaddingSmallLeft}>
         <BarChart
@@ -54,6 +74,8 @@ const Statistics = ({ prices }: PriceProps) => {
           minHeight={5}
           height={screenHeight - 550}
           noOfSections={6}
+          nestedScrollEnabled
+          scrollToIndex={scrollIndex}
           yAxisColor={theme.colors.primary}
           xAxisLabelTextStyle={styles.defaultText}
           yAxisTextStyle={styles.defaultText}
@@ -68,7 +90,6 @@ const Statistics = ({ prices }: PriceProps) => {
           <CustomButton label="1h" onPress={() => setInterval(60)} />
         </View>
       </Card>
-
       {/* Stats + Current Price */}
       {isValidStats(stats) && typeof currentPrice === 'number' && (
         <Card style={styles.statsCard}>
@@ -85,7 +106,6 @@ const Statistics = ({ prices }: PriceProps) => {
           </View>
         </Card>
       )}
-
       {/* Cheapest Window */}
       <Card>
         <Text style={styles.title}>Cheapest {chargingHours}-hour Window</Text>
@@ -144,7 +164,6 @@ const Statistics = ({ prices }: PriceProps) => {
           </>
         )}
       </Card>
-
       <View style={styles.button}>
         <CustomButton label="Go to Chart" onPress={goToChart} />
       </View>

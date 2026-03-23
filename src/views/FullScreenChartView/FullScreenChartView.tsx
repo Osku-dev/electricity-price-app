@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  Dimensions,
+  ScrollView,
+  RefreshControl,
+} from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useNavigate } from 'react-router-native';
@@ -11,15 +18,17 @@ import { Button } from 'components/Button/Button';
 import styles from './styles';
 import theme from 'theme';
 import { ChartIntervals, ChartPoint, PriceProps } from '../../../types';
+import { usePullToRefresh } from 'hooks/usePullToRefresh';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
 const FullScreenChart = ({ prices }: PriceProps) => {
-  const { priceData, loading, error } = prices;
+  const { priceData, loading, error, refetch } = prices;
 
   const [interval, setInterval] = useState<ChartIntervals>(1);
   const [highlightedIndex, setHighlightedIndex] = useState<number | undefined>();
+  const { refreshing, onRefresh } = usePullToRefresh(refetch);
   const navigate = useNavigate();
 
   const goToStats = () => navigate('/');
@@ -60,7 +69,10 @@ const FullScreenChart = ({ prices }: PriceProps) => {
   }
 
   return (
-    <View style={styles.screen}>
+    <ScrollView
+      style={styles.screen}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+    >
       {/* Top Bar */}
       <View style={styles.topRow}>
         <View style={styles.backButtonWrapper}>
@@ -111,7 +123,7 @@ const FullScreenChart = ({ prices }: PriceProps) => {
           <Text style={styles.text}>Price: {chartData[highlightedIndex].value} c/kWh</Text>
         </Card>
       )}
-    </View>
+    </ScrollView>
   );
 };
 

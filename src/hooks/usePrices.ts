@@ -3,7 +3,7 @@ import { useGetPricesQuery } from '../graphql/generated';
 import type { GetPricesQueryVariables } from '../graphql/generated';
 
 export const usePrices = (variables?: GetPricesQueryVariables) => {
-  const { data, loading, error, fetchMore, ...result } = useGetPricesQuery({
+  const { data, loading, error, refetch, fetchMore, ...result } = useGetPricesQuery({
     variables,
     fetchPolicy: 'cache-and-network',
   });
@@ -46,6 +46,7 @@ export const usePrices = (variables?: GetPricesQueryVariables) => {
     fetchPrevious: handleFetchPrevious,
     loading,
     error,
+    refetch,
     ...result,
   };
 };
