@@ -16,8 +16,13 @@ import styles from './styles';
 import theme from 'theme';
 import { Button as CustomButton } from 'components/Button/Button';
 import { Card } from 'components/Card/Card';
-import { useCurrentPrice } from 'hooks/useCurrentPrice';
-import { findCheapestChargingWindow, getFuturePrices, isValidStats } from 'utils/statHelpers';
+import { calculateCurrentIndex, useCurrentPrice } from 'hooks/useCurrentPrice';
+import {
+  findCheapestChargingWindow,
+  formatPrice,
+  getFuturePrices,
+  isValidStats,
+} from 'utils/statHelpers';
 import { StatIntervalMinutes, PriceProps } from '../../../types';
 import { usePullToRefresh } from 'hooks/usePullToRefresh';
 
@@ -40,14 +45,18 @@ const Statistics = ({ prices }: PriceProps) => {
   const displayedData = interval === 60 ? hourlyAveragedData : priceData;
   const chartData = mapPricesToChartData(displayedData);
   const { spacing } = calculateChartConfig(chartData, screenWidth);
-  const { currentPrice, currentPriceIndex } = useCurrentPrice(priceData);
+  const { currentPrice } = useCurrentPrice(priceData);
   const [scrollIndex, setScrollIndex] = useState<number | undefined>(undefined);
   const { refreshing, onRefresh } = usePullToRefresh(refetch);
   useEffect(() => {
-    if (currentPriceIndex != null) {
-      setScrollIndex(currentPriceIndex);
-    }
-  }, [currentPriceIndex]);
+    if (!priceData || priceData.length === 0) return;
+    const index = calculateCurrentIndex(priceData, interval);
+    const timeout = setTimeout(() => {
+      setScrollIndex(index);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [priceData, interval]);
 
   if (loading) {
     return (
@@ -67,23 +76,25 @@ const Statistics = ({ prices }: PriceProps) => {
     >
       {/* Chart */}
       <Card style={styles.cardPaddingSmallLeft}>
-        <BarChart
-          data={chartData}
-          spacing={spacing - 25}
-          barWidth={15}
-          minHeight={5}
-          height={screenHeight - 550}
-          noOfSections={6}
-          nestedScrollEnabled
-          scrollToIndex={scrollIndex}
-          yAxisColor={theme.colors.primary}
-          xAxisLabelTextStyle={styles.defaultText}
-          yAxisTextStyle={styles.defaultText}
-          verticalLinesColor="rgba(14,164,164,0.5)"
-          xAxisThickness={1}
-          xAxisColor={theme.colors.primary}
-          color={theme.colors.primary}
-        />
+        {scrollIndex !== undefined && (
+          <BarChart
+            data={chartData}
+            spacing={spacing - 25}
+            barWidth={15}
+            minHeight={5}
+            height={screenHeight - 550}
+            noOfSections={6}
+            nestedScrollEnabled
+            scrollToIndex={scrollIndex}
+            yAxisColor={theme.colors.primary}
+            xAxisLabelTextStyle={styles.defaultText}
+            yAxisTextStyle={styles.defaultText}
+            verticalLinesColor="rgba(14,164,164,0.5)"
+            xAxisThickness={1}
+            xAxisColor={theme.colors.primary}
+            color={theme.colors.primary}
+          />
+        )}
         <View style={styles.buttonRow}>
           <CustomButton label="15min" onPress={() => setInterval(15)} />
           <View style={styles.spacer} />
@@ -95,14 +106,14 @@ const Statistics = ({ prices }: PriceProps) => {
         <Card style={styles.statsCard}>
           <View>
             <Text style={styles.title}>Statistics</Text>
-            <Text style={styles.text}>Min: {stats.minPrice}¢</Text>
-            <Text style={styles.text}>Max: {stats.maxPrice}¢</Text>
-            <Text style={styles.text}>Avg: {stats.avgPrice}¢</Text>
+            <Text style={styles.text}>Min: {formatPrice(stats.minPrice)}¢</Text>
+            <Text style={styles.text}>Max: {formatPrice(stats.maxPrice)}¢</Text>
+            <Text style={styles.text}>Avg: {formatPrice(stats.avgPrice)}¢</Text>
           </View>
 
           <View style={styles.alignCenter}>
             <Text style={styles.title}>Current Price</Text>
-            <Text style={styles.text}>{currentPrice}¢</Text>
+            <Text style={styles.text}>{currentPrice.toFixed(3)}¢</Text>
           </View>
         </Card>
       )}

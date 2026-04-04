@@ -1,18 +1,16 @@
 import { addMinutes, isWithinInterval, parseISO } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { Price } from '../../types';
+import { Price, StatIntervalMinutes } from '../../types';
 
 const slotMinutes = 15;
 const TICK_MS = 30_000;
 
 export function useCurrentPrice(prices: Price[]) {
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
-  const [currentPriceIndex, setCurrentPriceIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!prices.length) {
       setCurrentPrice(null);
-      setCurrentPriceIndex(null);
       return;
     }
 
@@ -27,12 +25,10 @@ export function useCurrentPrice(prices: Price[]) {
 
       if (index === -1) {
         setCurrentPrice(null);
-        setCurrentPriceIndex(null);
         return;
       }
 
       setCurrentPrice(prices[index].value);
-      setCurrentPriceIndex(index);
     };
 
     update();
@@ -41,5 +37,19 @@ export function useCurrentPrice(prices: Price[]) {
     return () => clearInterval(intervalId);
   }, [prices]);
 
-  return { currentPrice, currentPriceIndex };
+  return { currentPrice };
+}
+
+export function calculateCurrentIndex(
+  prices: Price[],
+  intervalMinutes: StatIntervalMinutes,
+): number {
+  const now = new Date();
+
+  return prices.findIndex((item) => {
+    const start = new Date(item.timestamp);
+    const end = new Date(start.getTime() + intervalMinutes * 60 * 1000);
+
+    return now >= start && now < end;
+  });
 }

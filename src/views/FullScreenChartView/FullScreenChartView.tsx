@@ -120,7 +120,9 @@ const FullScreenChart = ({ prices }: PriceProps) => {
       {highlightedIndex !== undefined && chartData[highlightedIndex] && (
         <Card style={styles.highlightCard}>
           <Text style={styles.text}>Time: {chartData[highlightedIndex].label}:00</Text>
-          <Text style={styles.text}>Price: {chartData[highlightedIndex].value} c/kWh</Text>
+          <Text style={styles.text}>
+            Price: {chartData[highlightedIndex].value.toFixed(3)} c/kWh
+          </Text>
         </Card>
       )}
     </ScrollView>

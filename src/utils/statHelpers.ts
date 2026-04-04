@@ -43,3 +43,7 @@ export function isValidStats(stats: Stats | null | undefined): stats is Stats {
     typeof stats.avgPrice === 'number'
   );
 }
+
+export function formatPrice(value: number | null | undefined, decimals = 3): string {
+  return value != null ? value.toFixed(decimals) : '-';
+}
