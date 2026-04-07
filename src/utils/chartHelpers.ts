@@ -73,3 +73,12 @@ export function toHourlyAverages(prices: Price[]): Price[] {
 
   return result;
 }
+
+export function getDisplayedData(priceData: Price[], interval: number): Price[] {
+  if (!priceData || priceData.length === 0) return [];
+
+  const hourlyAveragedData = toHourlyAverages(priceData);
+  const displayedData = interval === 60 ? hourlyAveragedData : priceData;
+
+  return displayedData;
+}

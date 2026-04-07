@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 import { BarChart } from 'react-native-gifted-charts';
 import { addMinutes, format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-native';
-import { calculateChartConfig, mapPricesToChartData, toHourlyAverages } from 'utils/chartHelpers';
+import { calculateChartConfig, getDisplayedData, mapPricesToChartData } from 'utils/chartHelpers';
 import styles from './styles';
 import theme from 'theme';
 import { Button as CustomButton } from 'components/Button/Button';
@@ -41,22 +41,16 @@ const Statistics = ({ prices }: PriceProps) => {
   const navigate = useNavigate();
   const goToChart = () => navigate('/chart');
 
-  const hourlyAveragedData = toHourlyAverages(priceData);
-  const displayedData = interval === 60 ? hourlyAveragedData : priceData;
-  const chartData = mapPricesToChartData(displayedData);
+  const displayedData = useMemo(() => getDisplayedData(priceData, interval), [priceData, interval]);
+  const chartData = useMemo(() => mapPricesToChartData(displayedData), [displayedData]);
   const { spacing } = calculateChartConfig(chartData, screenWidth);
   const { currentPrice } = useCurrentPrice(priceData);
-  const [scrollIndex, setScrollIndex] = useState<number | undefined>(undefined);
   const { refreshing, onRefresh } = usePullToRefresh(refetch);
-  useEffect(() => {
-    if (!priceData || priceData.length === 0) return;
-    const index = calculateCurrentIndex(priceData, interval);
-    const timeout = setTimeout(() => {
-      setScrollIndex(index);
-    }, 500);
 
-    return () => clearTimeout(timeout);
-  }, [priceData, interval]);
+  const computedScrollIndex = useMemo(() => {
+    if (!displayedData.length) return 0;
+    return calculateCurrentIndex(displayedData, interval);
+  }, [displayedData, interval]);
 
   if (loading) {
     return (
@@ -76,7 +70,7 @@ const Statistics = ({ prices }: PriceProps) => {
     >
       {/* Chart */}
       <Card style={styles.cardPaddingSmallLeft}>
-        {scrollIndex !== undefined && (
+        {computedScrollIndex !== undefined && (
           <BarChart
             data={chartData}
             spacing={spacing - 25}
@@ -85,7 +79,7 @@ const Statistics = ({ prices }: PriceProps) => {
             height={screenHeight - 550}
             noOfSections={6}
             nestedScrollEnabled
-            scrollToIndex={scrollIndex}
+            scrollToIndex={computedScrollIndex}
             yAxisColor={theme.colors.primary}
             xAxisLabelTextStyle={styles.defaultText}
             yAxisTextStyle={styles.defaultText}
