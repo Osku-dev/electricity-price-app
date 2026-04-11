@@ -12,10 +12,9 @@
     "noFallthroughCasesInSwitch": true,
     "jsx": "react-native",
     "baseUrl": "./src",
+    "types": ["jest"],
     "paths": {
-      "*": [
-        "*"
-      ]
+      "*": ["*"]
     },
     "module": "node16",
     "moduleResolution": "node16",
