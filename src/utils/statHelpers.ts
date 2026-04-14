@@ -1,6 +1,6 @@
 import { Stats } from 'graphql/generated';
 import { Price } from '../../types';
-import { parseISO, addMinutes, isWithinInterval } from 'date-fns';
+import { parseISO, addMinutes } from 'date-fns';
 
 export function findCheapestChargingWindow(prices: Price[], hours: number) {
   const windowSize = hours * 4; // 15min entries
