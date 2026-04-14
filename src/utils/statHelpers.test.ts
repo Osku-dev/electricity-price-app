@@ -1,5 +1,5 @@
 import { Price } from '../../types';
-import { findCheapestChargingWindow, getFuturePrices } from './statHelpers';
+import { findCheapestChargingWindow, getFuturePrices, isValidStats } from './statHelpers';
 
 const createPrices = (values: number[]): Price[] => {
   return values.map((value, i) => {
@@ -117,5 +117,54 @@ describe('getFuturePrices', () => {
       '2026-01-01T02:00',
       '2026-01-01T02:15',
     ]);
+  });
+});
+
+describe('isValidStats', () => {
+  test('returns true for valid stats object', () => {
+    const stats = {
+      minPrice: 1,
+      maxPrice: 10,
+      avgPrice: 5,
+    };
+
+    expect(isValidStats(stats)).toBe(true);
+  });
+
+  test('returns false for null', () => {
+    expect(isValidStats(null)).toBe(false);
+  });
+
+  test('returns false for undefined', () => {
+    expect(isValidStats(undefined)).toBe(false);
+  });
+
+  test('returns false if a field is missing', () => {
+    const stats = {
+      minPrice: 1,
+      maxPrice: 10,
+      // avgPrice missing
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any;
+
+    expect(isValidStats(stats)).toBe(false);
+  });
+
+  test('returns false if a field is not a number', () => {
+    const stats = {
+      minPrice: 1,
+      maxPrice: 10,
+      avgPrice: '5', // wrong type
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any;
+
+    expect(isValidStats(stats)).toBe(false);
+  });
+
+  test('returns false for completely invalid object', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stats = { foo: 'bar' } as any;
+
+    expect(isValidStats(stats)).toBe(false);
   });
 });
