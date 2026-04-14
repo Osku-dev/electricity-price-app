@@ -31,7 +31,7 @@ export function getFuturePrices(prices: Price[]): Price[] {
   return prices.filter((price) => {
     const start = parseISO(price.timestamp);
     const end = addMinutes(start, 15);
-    return isWithinInterval(now, { start, end }) || start > now;
+    return (now >= start && now < end) || start > now;
   });
 }
 export function isValidStats(stats: Stats | null | undefined): stats is Stats {
