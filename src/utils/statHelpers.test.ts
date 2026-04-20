@@ -1,5 +1,10 @@
 import { Price } from '../../types';
-import { findCheapestChargingWindow, getFuturePrices, isValidStats } from './statHelpers';
+import {
+  findCheapestChargingWindow,
+  formatPrice,
+  getFuturePrices,
+  isValidStats,
+} from './statHelpers';
 
 const createPrices = (values: number[]): Price[] => {
   return values.map((value, i) => {
@@ -166,5 +171,35 @@ describe('isValidStats', () => {
     const stats = { foo: 'bar' } as any;
 
     expect(isValidStats(stats)).toBe(false);
+  });
+});
+
+describe('formatPrice', () => {
+  test('formats number with default decimals (3)', () => {
+    expect(formatPrice(1.23456)).toBe('1.235');
+  });
+
+  test('formats number with custom decimals', () => {
+    expect(formatPrice(1.23456, 2)).toBe('1.23');
+  });
+
+  test('returns "-" for null', () => {
+    expect(formatPrice(null)).toBe('-');
+  });
+
+  test('returns "-" for undefined', () => {
+    expect(formatPrice(undefined)).toBe('-');
+  });
+
+  test('formats zero correctly', () => {
+    expect(formatPrice(0)).toBe('0.000');
+  });
+
+  test('formats negative numbers correctly', () => {
+    expect(formatPrice(-1.2345, 2)).toBe('-1.23');
+  });
+
+  test('rounds correctly', () => {
+    expect(formatPrice(1.2355, 3)).toBe('1.236');
   });
 });
