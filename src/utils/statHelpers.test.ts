@@ -1,24 +1,11 @@
-import { Price } from '../../types';
 import {
   findCheapestChargingWindow,
   formatPrice,
   getFuturePrices,
   isValidStats,
 } from './statHelpers';
+import { createPrices } from './testHelpers';
 
-const createPrices = (values: number[]): Price[] => {
-  return values.map((value, i) => {
-    const totalMinutes = i * 15;
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    return {
-      value,
-      timestamp: `2026-01-01T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`,
-      resolutionMinutes: '15',
-    };
-  });
-};
 describe('findCheapestChargingWindow', () => {
   test('returns empty array if prices is empty', () => {
     const result = findCheapestChargingWindow([], 1);
