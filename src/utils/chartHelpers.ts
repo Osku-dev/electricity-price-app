@@ -50,6 +50,8 @@ export function trimToFullHours(prices: Price[]): Price[] {
     end--;
   }
 
+  if (start > end) return [];
+
   return prices.slice(start, end + 1);
 }
 
