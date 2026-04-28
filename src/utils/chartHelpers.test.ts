@@ -1,5 +1,6 @@
-import { mapPricesToChartData, trimToFullHours } from './chartHelpers';
+import { mapPricesToChartData, toHourlyAverages } from './chartHelpers';
 import { createPrices } from './testHelpers';
+import * as trimHelpers from './trimHelpers';
 
 describe('mapPricesToChartData', () => {
   test('maps a single price correctly', () => {
@@ -64,13 +65,13 @@ describe('mapPricesToChartData', () => {
 
 describe('trimToFullHours', () => {
   test('returns empty array if input is empty', () => {
-    expect(trimToFullHours([])).toEqual([]);
+    expect(trimHelpers.trimToFullHours([])).toEqual([]);
   });
 
   test('does not trim if already aligned to full hours', () => {
     const prices = createPrices([1, 2, 3, 4]); // 00:00 → 00:45
 
-    const result = trimToFullHours(prices);
+    const result = trimHelpers.trimToFullHours(prices);
 
     expect(result).toEqual(prices);
   });
@@ -80,7 +81,7 @@ describe('trimToFullHours', () => {
 
     const misaligned = prices.slice(1); // starts at 00:15
 
-    const result = trimToFullHours(misaligned);
+    const result = trimHelpers.trimToFullHours(misaligned);
 
     expect(result).toEqual([]);
   });
@@ -89,7 +90,7 @@ describe('trimToFullHours', () => {
     const prices = createPrices([1, 2, 3, 4, 5, 6]);
     // up to 01:15
 
-    const result = trimToFullHours(prices);
+    const result = trimHelpers.trimToFullHours(prices);
 
     const last = result[result.length - 1];
     expect(last.timestamp).toContain(':45');
@@ -100,7 +101,7 @@ describe('trimToFullHours', () => {
 
     const misaligned = prices.slice(1, 7);
 
-    const result = trimToFullHours(misaligned);
+    const result = trimHelpers.trimToFullHours(misaligned);
 
     expect(result).toEqual([]);
   });
@@ -108,9 +109,69 @@ describe('trimToFullHours', () => {
   test('returns empty array if no complete hour window exists', () => {
     const prices = createPrices([1, 2, 3]); // 00:00, 00:15, 00:30
 
-    const result = trimToFullHours(prices);
+    const result = trimHelpers.trimToFullHours(prices);
 
     // no full hour block (missing :45 end)
+    expect(result).toEqual([]);
+  });
+});
+describe('toHourlyAverages', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('calls trimToFullHours with input prices', () => {
+    const input = createPrices([10, 20, 30, 40]);
+
+    jest.spyOn(trimHelpers, 'trimToFullHours').mockReturnValue(input);
+
+    toHourlyAverages(input);
+
+    expect(trimHelpers.trimToFullHours).toHaveBeenCalledWith(input);
+  });
+
+  test('calculates one hourly average correctly from 4 values', () => {
+    const input = createPrices([10, 20, 30, 40]);
+
+    jest.spyOn(trimHelpers, 'trimToFullHours').mockReturnValue(input);
+
+    const result = toHourlyAverages(input);
+
+    expect(result).toEqual([
+      {
+        timestamp: input[0].timestamp,
+        value: 25, // (10+20+30+40)/4
+        resolutionMinutes: '60',
+      },
+    ]);
+  });
+
+  test('calculates multiple hourly averages correctly', () => {
+    const input = createPrices([10, 20, 30, 40, 50, 60, 70, 80]);
+
+    jest.spyOn(trimHelpers, 'trimToFullHours').mockReturnValue(input);
+
+    const result = toHourlyAverages(input);
+
+    expect(result).toEqual([
+      {
+        timestamp: input[0].timestamp,
+        value: 25,
+        resolutionMinutes: '60',
+      },
+      {
+        timestamp: input[4].timestamp,
+        value: 65,
+        resolutionMinutes: '60',
+      },
+    ]);
+  });
+
+  test('returns empty array when trimmed data is empty', () => {
+    jest.spyOn(trimHelpers, 'trimToFullHours').mockReturnValue([]);
+
+    const result = toHourlyAverages([]);
+
     expect(result).toEqual([]);
   });
 });
