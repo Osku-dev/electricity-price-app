@@ -12,6 +12,7 @@
     "noFallthroughCasesInSwitch": true,
     "jsx": "react-native",
     "baseUrl": "./src",
+    "ignoreDeprecations": "6.0",
     "types": ["jest"],
     "paths": {
       "*": ["*"]
